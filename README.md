@@ -20,8 +20,6 @@ Server tiếp nhận, xử lý và quản lý dữ liệu từ nhiều máy Clie
 - Lưu trữ dữ liệu giám sát để phục vụ theo dõi và thống kê.
 
 ## 🏗️ Kiến trúc hệ thống
-
-```text
 ┌──────────────┐
 │    Client    │
 │     PC 01    │
@@ -44,7 +42,9 @@ Server tiếp nhận, xử lý và quản lý dữ liệu từ nhiều máy Clie
 │ CPU / RAM    │
 │ Online/Offline│
 └──────────────┘
-2. 🔎 Các Project tham khảo
+
+
+# 2. 🔎 Các Project tham khảo
 
 Nhóm tham khảo một số project mã nguồn mở có liên quan đến MQTT, monitoring và thu thập dữ liệu hệ thống.
 
@@ -97,14 +97,14 @@ Publish/Subscribe
 QoS
 Retained Message
 Last Will and Testament
-3. 🚀 Những điểm nhóm phát triển thêm
+# 3. 🚀 Những điểm nhóm phát triển thêm
 
 Các project tham khảo chủ yếu tập trung vào việc minh họa hoặc cung cấp thư viện/giao thức MQTT.
 
 Nhóm sẽ phát triển thành một ứng dụng giám sát phòng máy hoàn chỉnh, tập trung vào việc quản lý nhiều máy tính trong cùng một hệ thống.
 
 Các chức năng nhóm dự kiến bổ sung
-3.1. 🖥️ Giám sát nhiều máy tính
+# 3.1. 🖥️ Giám sát nhiều máy tính
 
 Cho phép nhiều máy tính trong phòng máy cùng kết nối đến MQTT Broker.
 
@@ -115,7 +115,7 @@ PC02 🟢 Online
 PC03 🔴 Offline
 PC04 🟢 Online
 PC05 🟢 Online
-3.2. 📊 Giám sát tài nguyên máy
+# 3.2. 📊 Giám sát tài nguyên máy
 
 Hệ thống thu thập:
 
@@ -125,7 +125,7 @@ Disk: 70%
 
 và cập nhật lên Dashboard theo thời gian thực.
 
-3.3. 🔴 Phát hiện máy Offline
+# 3.3. 🔴 Phát hiện máy Offline
 
 Nếu Client mất kết nối với hệ thống, Dashboard sẽ cập nhật trạng thái:
 
@@ -133,7 +133,7 @@ PC03 🔴 OFFLINE
 
 Nhóm dự kiến sử dụng cơ chế phù hợp của MQTT như Last Will and Testament để hỗ trợ phát hiện trạng thái mất kết nối.
 
-3.4. ⚠️ Cảnh báo tài nguyên
+# 3.4. ⚠️ Cảnh báo tài nguyên
 
 Khi CPU hoặc RAM vượt ngưỡng được cấu hình:
 
@@ -144,7 +144,7 @@ Dashboard hiển thị:
 ⚠️ CẢNH BÁO
 
 PC02 đang sử dụng CPU 95%
-3.5. 📈 Dashboard thời gian thực
+# 3.5. 📈 Dashboard thời gian thực
 
 Xây dựng giao diện tập trung cho phép quản trị viên:
 
@@ -155,7 +155,7 @@ Theo dõi RAM.
 Theo dõi Disk.
 Xem cảnh báo.
 Theo dõi dữ liệu theo thời gian thực.
-3.6. 💾 Lưu lịch sử dữ liệu
+# 3.6. 💾 Lưu lịch sử dữ liệu
 
 Khác với các ví dụ MQTT cơ bản chỉ truyền message, hệ thống của nhóm sẽ lưu dữ liệu giám sát vào Database.
 
