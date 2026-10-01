@@ -1,5 +1,5 @@
-MQTT – Giao thức truyền thông nhẹ cho IoT
-1. MQTT là gì?
+# MQTT – Giao thức truyền thông nhẹ cho IoT
+## 1. MQTT là gì?
 
 MQTT (Message Queuing Telemetry Transport) là một giao thức truyền thông nhẹ, được thiết kế để trao đổi dữ liệu giữa các thiết bị thông qua mạng.
 
@@ -12,7 +12,7 @@ Cảm biến và thiết bị thông minh
 Nhà thông minh
 Hệ thống thu thập dữ liệu
 Các ứng dụng cần truyền dữ liệu nhẹ
-2. MQTT hoạt động như thế nào?
+## 2. MQTT hoạt động như thế nào?
 
 MQTT có 3 thành phần chính:
 
@@ -43,7 +43,7 @@ Ví dụ:
 sensor/temperature
 sensor/humidity
 device/001/status
-3. Mô hình MQTT
+## 3. Mô hình MQTT
 
 Mô hình cơ bản:
 
@@ -61,7 +61,7 @@ Subscriber
 
 Publisher và Subscriber không cần kết nối trực tiếp với nhau. MQTT Broker đứng giữa để nhận và phân phối message.
 
-4. Publish là gì?
+## 4. Publish là gì?
 
 Publish nghĩa là gửi một message lên một Topic.
 
@@ -81,7 +81,7 @@ Message: 30°C
 
 Broker nhận message và chuyển đến những Client đã Subscribe Topic đó.
 
-5. Subscribe là gì?
+## 5. Subscribe là gì?
 
 Subscribe nghĩa là đăng ký nhận message từ một Topic.
 
@@ -98,7 +98,7 @@ Message: 30°C
 Subscriber sẽ nhận được:
 
 30°C
-6. Topic trong MQTT
+## 6. Topic trong MQTT
 
 Topic được sử dụng để phân loại message.
 
@@ -124,7 +124,7 @@ home/
 
 Nhờ Topic, Broker biết message cần được gửi đến những Subscriber nào.
 
-7. MQTT Broker
+## 7. MQTT Broker
 
 Broker là thành phần trung tâm của hệ thống MQTT.
 
@@ -149,7 +149,7 @@ Broker
 Client B
    |
 Client C
-8. MQTT và mô hình OSI
+## 8. MQTT và mô hình OSI
 
 MQTT thuộc tầng ứng dụng – Layer 7 trong mô hình OSI.
 
@@ -172,7 +172,7 @@ Cổng thường gặp:
 
 MQTT       → TCP 1883
 MQTT + TLS → TCP 8883
-9. QoS trong MQTT
+## 9. QoS trong MQTT
 
 QoS (Quality of Service) quy định mức độ đảm bảo khi gửi message.
 
@@ -220,7 +220,7 @@ Nhược điểm
 Cần MQTT Broker làm trung gian.
 Nếu Broker gặp sự cố, hệ thống có thể bị ảnh hưởng.
 Cần cấu hình bảo mật phù hợp khi truyền dữ liệu quan trọng.
-11. Demo MQTT bằng Python
+## 11. Demo MQTT bằng Python
 
 Có thể sử dụng thư viện Paho MQTT.
 
@@ -274,7 +274,7 @@ Hello MQTT!
 Subscriber nhận:
 
 Nhan: Hello MQTT!
-13. Luồng Demo hoàn chỉnh
+## 13. Luồng Demo hoàn chỉnh
 ┌──────────────┐
 │   Publisher  │
 │    Python    │
@@ -307,7 +307,7 @@ Broker
 Subscriber
     ↓
 Nhan: Hello MQTT!
-14. MQTT được sử dụng ở đâu?
+## 14. MQTT được sử dụng ở đâu?
 
 MQTT phù hợp với những hệ thống cần truyền dữ liệu giữa nhiều thiết bị.
 
@@ -319,7 +319,7 @@ Ví dụ:
 🏭 Nhà máy thông minh
 📡 Hệ thống cảm biến
 📊 Thu thập dữ liệu từ thiết bị
-15. Các thuật ngữ cần nhớ khi thuyết trình
+## 15. Các thuật ngữ cần nhớ khi thuyết trình
 Thuật ngữ	Ý nghĩa
 MQTT	Giao thức truyền thông nhẹ
 Client	Thiết bị/chương trình sử dụng MQTT
@@ -365,9 +365,8 @@ MQTT khác mô hình gửi trực tiếp như thế nào?
 
 MQTT sử dụng Broker làm trung gian và mô hình Publish/Subscribe, giúp Publisher không cần biết trực tiếp Subscriber là ai.
 
-17. Tài liệu/GitHub tham khảo
+## 17. Tài liệu/GitHub tham khảo
 
-Có thể đưa vào cuối README:
 
 Eclipse Paho MQTT:
 GitHub – Eclipse Paho
