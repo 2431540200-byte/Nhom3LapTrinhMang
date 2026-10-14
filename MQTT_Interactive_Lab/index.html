@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MQTT Interactive Lab</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><div class="logo">MQ</div><div><small>NETWORK PROGRAMMING LAB</small><h1>MQTT Interactive Lab</h1></div><span class="badge">● Mô phỏng</span></header>
+<main>
+<section class="hero card"><small>LEARN BY DOING</small><h2>Mô phỏng giao thức MQTT</h2><p>Gửi message, đăng ký Topic và quan sát Broker chuyển tiếp dữ liệu đến Subscriber phù hợp.</p></section>
+<section class="card"><h2>1. Mô hình hoạt động</h2><div class="flow"><div class="node" id="publisherNode"><b>↑</b><h3>Publisher</h3><p>Gửi message</p></div><div class="arrow" id="arrow1">→</div><div class="node broker" id="brokerNode"><b>◎</b><h3>MQTT Broker</h3><p>Định tuyến theo Topic</p></div><div class="arrow" id="arrow2">→</div><div class="node subscriber" id="subscriberNode"><b>↓</b><h3>Subscriber</h3><p>Nhận message</p></div></div><p class="note"><strong>Lưu ý:</strong> Đây là mô phỏng JavaScript trong trình duyệt, chưa gửi message MQTT thật qua mạng.</p></section>
+<div class="columns">
+<section class="card"><h2>2. Publish message</h2><form id="publishForm"><label for="topic">Topic</label><input id="topic" value="classroom/temperature" required><label for="message">Nội dung</label><textarea id="message" rows="3" required>28°C</textarea><label for="qos">QoS</label><select id="qos"><option value="0">QoS 0 — At most once</option><option value="1">QoS 1 — At least once</option><option value="2">QoS 2 — Exactly once</option></select><p id="qosInfo" class="note">Gửi tối đa một lần; message có thể bị mất.</p><button type="submit">↑ Publish message</button></form></section>
+<section class="card"><h2>3. Subscriber</h2><form id="subForm"><label for="subName">Tên thiết bị</label><input id="subName" placeholder="Ví dụ: Điện thoại A" required><label for="subTopic">Topic đăng ký</label><input id="subTopic" value="classroom/temperature" required><button class="secondary" type="submit">+ Thêm Subscriber</button></form><div id="subscribers"></div></section>
+</div>
+<section class="card"><div class="section-title"><h2>4. Nhật ký message</h2><button id="clear" class="secondary" type="button">Xóa nhật ký</button></div><p id="empty" class="muted">Chưa có message. Hãy nhấn Publish để bắt đầu.</p><div id="logs"></div></section>
+<section class="card"><h2>5. Kiến thức cần nhớ</h2><div class="glossary"><article><h3>Publisher</h3><p>Client gửi message đến Broker theo một Topic.</p></article><article><h3>Broker</h3><p>Nhận message và chuyển đến Subscriber có Topic phù hợp.</p></article><article><h3>Subscriber</h3><p>Client đăng ký Topic để nhận message tương ứng.</p></article><article><h3>QoS</h3><p>0: tối đa một lần; 1: ít nhất một lần; 2: đúng một lần theo cơ chế MQTT.</p></article></div></section>
+<footer>MQTT Interactive Lab · HTML + CSS + JavaScript</footer>
+</main><div id="toast" role="status"></div><script src="script.js"></script>
+</body></html>
