@@ -41,6 +41,12 @@ class ParseArgsTest(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 parse('--room', 'ABC123', '--device', 'PC01', '--interval', bad)
 
+    def test_interval_too_large(self):
+        with self.assertRaises(SystemExit):
+            parse('--room', 'ABC123', '--device', 'PC01', '--interval', '20')
 
+    def test_default_device_is_valid(self):
+        import re
+        self.assertRegex(agent.default_device(), r'^[A-Za-z0-9_-]{1,40}$')
 if __name__ == '__main__':
     unittest.main()

@@ -15,13 +15,21 @@ from datetime import datetime, timezone
 from urllib.parse import urlparse
 
 
+def default_device():
+    """Tên máy đã làm sạch để hợp lệ làm mã thiết bị."""
+    name = re.sub(r'[^A-Za-z0-9_-]', '-', socket.gethostname())[:40]
+    return name or 'PC01'
+
+
 def parse_args():
     p = argparse.ArgumentParser(description='MQTT PC Monitor — Agent lấy số đo thật')
     p.add_argument('--room', required=True, help='Mã phòng trên website')
-    p.add_argument('--device', default=socket.gethostname(), help='Mã máy: chữ, số, _ hoặc -')
+    p.add_argument('--device', default=default_device(), help='Mã máy: chữ, số, _ hoặc -')
     p.add_argument('--broker', default='wss://test.mosquitto.org:8081/mqtt')
     p.add_argument('--disk', default=os.path.abspath(os.sep), help='Phân vùng cần đo, ví dụ C:\\')
     p.add_argument('--interval', type=float, default=3)
+    p.add_argument('--no-hostname', action='store_true',
+                   help='Không gửi tên máy thật lên Broker')
     args = p.parse_args()
     if not re.fullmatch(r'[A-Za-z0-9_-]{6,40}', args.room):
         p.error('room cần 6–40 chữ, số, _ hoặc -')
@@ -29,13 +37,19 @@ def parse_args():
         p.error('device cần 1–40 chữ, số, _ hoặc -')
     if not math.isfinite(args.interval) or args.interval < 1:
         p.error('interval phải là số hữu hạn >= 1 giây')
+    if args.interval > 10:
+        p.error('interval nên <= 10 giây (Dashboard coi Offline sau 15 giây)')
     return args
 
 
 def main():
     args = parse_args()
-    import psutil
-    import paho.mqtt.client as mqtt
+    try:
+        import psutil
+        import paho.mqtt.client as mqtt
+    except ImportError as exc:
+        raise SystemExit(
+            f'Thiếu thư viện "{exc.name}". Chạy: python -m pip install -r agent/requirements.txt')
     url = urlparse(args.broker)
     if url.scheme not in ('wss', 'mqtts') or not url.hostname or url.username or url.password:
         raise SystemExit('Dùng URL wss:// hoặc mqtts://, không chứa tài khoản.')
@@ -90,10 +104,16 @@ def main():
             cpu = psutil.cpu_percent(interval=None)
             if not connected.is_set():
                 continue
+            try:
+                disk = psutil.disk_usage(args.disk).percent
+            except OSError as exc:
+                logging.warning('Không đọc được phân vùng, bỏ qua lượt này: %s', exc)
+                continue
             data = {'cpu': cpu, 'ram': psutil.virtual_memory().percent,
-                    'disk': psutil.disk_usage(args.disk).percent,
-                    'hostname': socket.gethostname(), 'source': 'agent',
+                    'disk': disk, 'source': 'agent',
                     'timestamp': datetime.now(timezone.utc).isoformat()}
+            if not args.no_hostname:
+                data['hostname'] = socket.gethostname()
             result = client.publish(prefix + '/metrics', json.dumps(data), qos=1, retain=False)
             if result.rc == mqtt.MQTT_ERR_SUCCESS:
                 logging.info('CPU %.1f%% | RAM %.1f%% | Disk %.1f%%', data['cpu'], data['ram'], data['disk'])
@@ -102,7 +122,7 @@ def main():
             result = client.publish(prefix + '/status', offline, qos=1, retain=True)
             try:
                 result.wait_for_publish(timeout=3)
-            except RuntimeError:
+            except (RuntimeError, ValueError):
                 pass
         client.disconnect()
         client.loop_stop()
