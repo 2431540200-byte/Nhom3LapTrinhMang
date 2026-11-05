@@ -25,7 +25,7 @@ def parse_args():
     p = argparse.ArgumentParser(description='MQTT PC Monitor — Agent lấy số đo thật')
     p.add_argument('--room', required=True, help='Mã phòng trên website')
     p.add_argument('--device', default=default_device(), help='Mã máy: chữ, số, _ hoặc -')
-    p.add_argument('--broker', default='wss://test.mosquitto.org:8081/mqtt')
+    p.add_argument('--broker', default='wss://broker.hivemq.com:8884/mqtt')
     p.add_argument('--disk', default=os.path.abspath(os.sep), help='Phân vùng cần đo, ví dụ C:\\')
     p.add_argument('--interval', type=float, default=3)
     p.add_argument('--no-hostname', action='store_true',
