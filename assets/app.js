@@ -1,7 +1,7 @@
 import {validFilter,validateMetrics,roomPrefix,csvCell} from './core.js';
 const $=s=>document.querySelector(s),id=()=>Array.from(crypto.getRandomValues(new Uint8Array(6)),b=>b.toString(16).padStart(2,'0')).join('');
 const MAX_DEVICES=100,MIN_GAP_MS=500;let client=null,prefix='',activeRoom='',timer=null,simId=null,selected=null,history=[],devices=new Map(),subscriptions=new Set(),logCount=0;
-const session=id();const params=new URLSearchParams(location.search);$('#room').value=/^[A-Za-z0-9_-]{6,40}$/.test(params.get('room')||'')?params.get('room'):id();
+const session=id();const params=new URLSearchParams(location.search);$('#room').value=/^[A-Za-z0-9_-]{6,40}$/.test(params.get('room')||'')?params.get('room'):'lab_01';
 function notice(s){$('#notice').textContent=s;}
 function log(type,topic,payload=''){if(!logCount)$('#logs').replaceChildren();const row=document.createElement('div');row.className='log';const time=document.createElement('time');time.textContent=new Date().toLocaleTimeString('vi-VN');const title=document.createElement('strong');title.textContent=`${type} · ${topic}`;const pre=document.createElement('pre');pre.textContent=String(payload).slice(0,3000);row.append(time,title,pre);$('#logs').prepend(row);logCount++;while($('#logs').children.length>150)$('#logs').lastChild.remove();}
 function connected(){if(!client?.connected){notice('Hãy kết nối MQTT trước.');return false;}return true;}
