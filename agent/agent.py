@@ -4,6 +4,7 @@ import json
 import logging
 import math
 import os
+from pathlib import Path
 import re
 import signal
 import socket
@@ -21,10 +22,29 @@ def default_device():
     return name or 'PC01'
 
 
+def persistent_device_id():
+    """Generate a stable per-installation ID; never reuse a shared PC01 default."""
+    location = Path.home() / '.mqtt-pc-monitor' / 'device_id'
+    try:
+        if location.is_file():
+            value = location.read_text(encoding='utf-8').strip()
+            if re.fullmatch(r'[A-Za-z0-9_-]{1,40}', value):
+                return value
+        location.parent.mkdir(parents=True, exist_ok=True)
+        value = 'PC-' + uuid.uuid4().hex[:12]
+        with location.open('x', encoding='utf-8') as f:
+            f.write(value + '\n')
+        return value
+    except FileExistsError:
+        return location.read_text(encoding='utf-8').strip()
+    except OSError as exc:
+        raise SystemExit(f'Không thể lưu Device ID tại {location}: {exc}. Dùng --device để đặt mã thủ công.')
+
+
 def parse_args():
     p = argparse.ArgumentParser(description='MQTT PC Monitor — Agent lấy số đo thật')
     p.add_argument('--room', required=True, help='Mã phòng trên website')
-    p.add_argument('--device', default=default_device(), help='Mã máy: chữ, số, _ hoặc -')
+    p.add_argument('--device', default=None, help='Mã máy riêng; bỏ trống để tạo và lưu ID ổn định')
     p.add_argument('--broker', default='wss://broker.hivemq.com:8884/mqtt')
     p.add_argument('--disk', default=os.path.abspath(os.sep), help='Phân vùng cần đo, ví dụ C:\\')
     p.add_argument('--interval', type=float, default=3)
@@ -33,6 +53,7 @@ def parse_args():
     args = p.parse_args()
     if not re.fullmatch(r'[A-Za-z0-9_-]{6,40}', args.room):
         p.error('room cần 6–40 chữ, số, _ hoặc -')
+    args.device = args.device or persistent_device_id()
     if not re.fullmatch(r'[A-Za-z0-9_-]{1,40}', args.device):
         p.error('device cần 1–40 chữ, số, _ hoặc -')
     if not math.isfinite(args.interval) or args.interval < 1:
@@ -61,6 +82,10 @@ def main():
     stop = threading.Event()
     connected = threading.Event()
     prefix = f'pcmon/v1/{args.room}/devices/{args.device}'
+    session_id = uuid.uuid4().hex
+    def status_payload(state):
+        return json.dumps({'state': state, 'source': 'agent', 'session_id': session_id,
+                           'timestamp': datetime.now(timezone.utc).isoformat()})
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2,
                          client_id=f'agent_{uuid.uuid4().hex[:16]}',
                          transport='websockets' if url.scheme == 'wss' else 'tcp',
@@ -73,7 +98,7 @@ def main():
     client.tls_set(tls_version=ssl.PROTOCOL_TLS_CLIENT)
     if os.environ.get('MQTT_USERNAME'):
         client.username_pw_set(os.environ['MQTT_USERNAME'], os.environ.get('MQTT_PASSWORD'))
-    offline = json.dumps({'state': 'offline', 'source': 'agent'})
+    offline = status_payload('offline')
     client.will_set(prefix + '/status', offline, qos=1, retain=True)
     client.reconnect_delay_set(min_delay=1, max_delay=30)
     client.max_queued_messages_set(10)
@@ -83,7 +108,9 @@ def main():
             logging.error('Broker từ chối kết nối: %s', reason_code)
             return
         connected.set()
-        c.publish(prefix + '/status', json.dumps({'state': 'online', 'source': 'agent'}), qos=1, retain=True)
+        result = c.publish(prefix + '/status', status_payload('online'), qos=1, retain=True)
+        if result.rc != mqtt.MQTT_ERR_SUCCESS:
+            logging.warning('Không gửi được trạng thái online: %s', mqtt.error_string(result.rc))
         logging.info('Đã kết nối. Phòng %s / %s', args.room, args.device)
 
     def on_disconnect(c, userdata, flags, reason_code, properties):
@@ -110,13 +137,16 @@ def main():
                 logging.warning('Không đọc được phân vùng, bỏ qua lượt này: %s', exc)
                 continue
             data = {'cpu': cpu, 'ram': psutil.virtual_memory().percent,
-                    'disk': disk, 'source': 'agent',
+                    'disk': disk, 'source': 'agent', 'device_id': args.device,
+                    'session_id': session_id,
                     'timestamp': datetime.now(timezone.utc).isoformat()}
             if not args.no_hostname:
                 data['hostname'] = socket.gethostname()
             result = client.publish(prefix + '/metrics', json.dumps(data), qos=1, retain=False)
             if result.rc == mqtt.MQTT_ERR_SUCCESS:
-                logging.info('CPU %.1f%% | RAM %.1f%% | Disk %.1f%%', data['cpu'], data['ram'], data['disk'])
+                logging.info('Đã xếp hàng gửi CPU %.1f%% | RAM %.1f%% | Disk %.1f%%', data['cpu'], data['ram'], data['disk'])
+            else:
+                logging.warning('Không xếp hàng gửi được telemetry: %s', mqtt.error_string(result.rc))
     finally:
         if connected.is_set():
             result = client.publish(prefix + '/status', offline, qos=1, retain=True)
