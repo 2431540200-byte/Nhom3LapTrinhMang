@@ -5,8 +5,8 @@ Browser dùng MQTT.js qua WSS; Agent dùng Paho qua WSS hoặc MQTT/TLS. Broker 
 ## Topic và dữ liệu
 
 Prefix `pcmon/v1/<room>`.
-- `/devices/<device>/metrics`: JSON {cpu,ram,disk,hostname,source,timestamp}; QoS 1, không retained.
-- `/devices/<device>/status`: JSON {state:"online"|"offline",source}; Agent QoS 1 retained, Last Will offline.
+- `/devices/<device>/metrics`: JSON {cpu,ram,disk,hostname,source,timestamp,device_id,session_id}; QoS 1, không retained.
+- `/devices/<device>/status`: JSON {state:"online"|"offline",source,session_id,timestamp}; Agent QoS 1 retained, Last Will offline.
 - `/lab/<topic>`: payload tự do dưới 16 KB; QoS và retained theo lựa chọn.
 - `/presence/<session>`: Last Will của trình duyệt, không ánh xạ thành Last Will của từng máy thử.
 
@@ -23,3 +23,7 @@ localStorage key `pcmon:<room>`, tối đa 2.000 mẫu/phòng. Nhật ký DOM t�
 ## Mở rộng
 
 Backend Subscriber + SQLite/PostgreSQL cho lịch sử tập trung; cấp tài khoản ngắn hạn và ACL cho phòng; giới hạn tốc độ; đóng gói Agent EXE; host Broker riêng. Các phần này chưa được triển khai.
+
+## Nhận dạng thiết bị
+
+Khi không cung cấp `--device`, Agent lưu Device ID riêng tại `~/.mqtt-pc-monitor/device_id`, không dùng hostname làm mã mặc định. Dashboard bỏ qua status offline của phiên khác nếu đang có session_id từ telemetry mới. Telemetry chứa timestamp đo, Dashboard ghi thêm received (thời gian trình duyệt nhận) và measuredAt để xuất CSV. Agent gửi QoS 1 nhưng việc đưa vào hàng đợi không tương đương PUBACK.
