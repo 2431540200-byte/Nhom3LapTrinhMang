@@ -30,7 +30,7 @@ Nếu báo chưa tải thư viện MQTT, kiểm tra kết nối đến unpkg.com
 
 ## 2. Thử hai trình duyệt / hai máy
 
-1. Mở web, giữ Broker mặc định `wss://test.mosquitto.org:8081/mqtt` hoặc nhập Broker WSS riêng.
+1. Mở web, giữ Broker mặc định `wss://broker.hivemq.com:8884/mqtt` hoặc nhập Broker WSS riêng.
 2. Tạo mã phòng, bấm **Kết nối MQTT**. Chờ trạng thái Đã kết nối.
 3. Sao chép link sang trình duyệt khác; cả hai phải dùng cùng Broker và phòng.
 4. Trình duyệt A theo dõi Dashboard; B chọn PC01 và **Phát mỗi 3 giây**.
@@ -62,8 +62,8 @@ python -m venv .venv
 .venv\Scripts\python agent\agent.py --room MA_PHONG --device PC01
 ```
 
-Thay `MA_PHONG` bằng mã phòng trên website (6–40 chữ/số/_/-). Máy thứ hai dùng PC02.
-Mặc định đo phân vùng hệ thống. Có thể chọn bằng `--disk C:\` (Windows) hoặc `--disk /` (Linux).
+Thay `MA_PHONG` bằng mã phòng trên website (6–40 chữ/số/_/-). Nếu bỏ `--device`, Agent tự tạo và lưu Device ID ổn định trong `~/.mqtt-pc-monitor/device_id` trên từng máy. Có thể dùng `--device PC01`, `--device PC02` để đặt tên rõ ràng, nhưng tuyệt đối không đặt trùng giữa các máy.
+Agent gửi thêm `device_id` và `session_id` để nhận diện máy/phiên; Dashboard hiển thị số đo thật khi nhận telemetry từ Agent. Mặc định đo phân vùng hệ thống. Có thể chọn bằng `--disk C:\` (Windows) hoặc `--disk /` (Linux).
 Ctrl+C dừng Agent bình thường. Ngắt mạng đột ngột sẽ dựa vào Last Will và timeout.
 Agent gửi hostname thật; chỉ chạy khi người dùng đồng ý chia sẻ thông tin máy.
 
@@ -110,7 +110,7 @@ Tên Topic được giới hạn trong prefix của phòng bởi giao diện, kh
 
 Số đo không retained để tránh hiển thị số đo cũ như mới. Agent giữ status Online/Offline; Dashboard chỉ coi máy Online khi nhận số đo mới. Sau reload, số đo cục bộ hiển thị Offline cho tới khi có dữ liệu mới.
 Khi web mất Broker, tất cả máy hiển thị Offline; điều đó cũng có thể là đường kết nối của Dashboard bị gián đoạn, chưa chứng minh các máy đã tắt.
-Ngưỡng áp dụng chung, cảnh báo khi bất kỳ chỉ số nào > ngưỡng. Disk là % dung lượng đã dùng, không phải tốc độ I/O.
+Ngưỡng áp dụng chung, cảnh báo khi bất kỳ chỉ số nào >= ngưỡng. Disk là % dung lượng đã dùng, không phải tốc độ I/O.
 Đồng hồ biểu đồ dùng thời gian nhận tại trình duyệt. Tab nền có thể bị trình duyệt làm chậm; Agent Python phù hợp giám sát liên tục hơn thiết bị thử trên web.
 
 ## Kiểm tra mã nguồn
@@ -139,3 +139,14 @@ agent/requirements.txt   Thư viện Agent
 ```
 
 Mã nguồn theo MIT License. MQTT.js, Paho và psutil tuân theo giấy phép riêng của từng dự án.
+
+## Checklist chạy thử trên nhiều máy (cần thực hiện với Broker thực)
+
+1. Trên website, tạo mã phòng riêng (6–40 ký tự) và kết nối Broker WSS.
+2. PC01 cài Python, chạy `python -m pip install -r agent/requirements.txt` rồi `python agent/agent.py --room MA_PHONG --device PC01`.
+3. PC02 làm tương tự với `--device PC02`, cùng phòng và Broker. Không cần chạy website tại từng máy Agent.
+4. Kiểm tra số đo bằng Task Manager (CPU/RAM có thể dao động) và Disk trong Windows Settings/Explorer. Disk là % dung lượng đã dùng của phân vùng được đo.
+5. Ctrl+C dừng Agent và xác nhận Offline. Rút mạng và chờ Last Will/timeout 15 giây; sau đó kết nối lại và xác nhận chỉ số tiếp tục cập nhật.
+6. Thử mô phỏng CPU 90% ở mã máy thử khác để kiểm tra cảnh báo; tải CSV và kiểm tra các cột received, measuredAt.
+
+**Lưu ý bảo mật:** Broker công cộng không xác thực nguồn dữ liệu; trường `source: agent` là nhãn do Publisher gửi, không phải bằng chứng dữ liệu đáng tin. Muốn dùng ngoài môi trường lab phải sử dụng Broker riêng, tài khoản theo thiết bị và ACL. Không chia sẻ hostname trên Broker công cộng khi không cần; dùng `--no-hostname`.
