@@ -29,3 +29,11 @@ Kiểm tra tự động không thay thế kiểm thử mạng. Ghi riêng các m
 - Chưa chạy được kiểm thử trình duyệt: runtime thiếu Chromium.
 - Chưa xác minh MQTT WSS đầu cuối: endpoint Broker không truy cập được từ môi trường tạo project.
 - Chưa triển khai GitHub Pages; cần người dùng push và bật Pages.
+
+## Bổ sung kiểm thử phiên bản hiện tại
+
+`python -m unittest discover -s tests -p 'test_*.py' -v`: kiểm tra Device ID ổn định, override từ CLI, mã phòng và interval không hợp lệ.
+
+Workflow `.github/workflows/code-quality.yml` chạy kiểm tra cú pháp JavaScript, unit test Node, biên dịch Python và unit test Python trên mỗi push/PR. Việc thêm workflow không có nghĩa tất cả kiểm thử đã đạt; hãy xem tab Actions trên GitHub và ghi nhận kết quả thực tế.
+
+Các tình huống kết nối Broker, ngắt mạng, 2 máy tính và GitHub Pages vẫn cần kiểm thử tích hợp trực tiếp; không đánh dấu đạt nếu chưa có biên bản.
